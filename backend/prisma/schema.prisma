@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CREW
+  CONTROL
+}
+
+enum MessageStatus {
+  CREATED
+  QUEUED
+  SENT
+  DELIVERED
+  ACKNOWLEDGED
+}
+
+enum MessagePriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum LogMood {
+  CALM
+  FOCUSED
+  TIRED
+  STRESSED
+  ALERT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  assignedTasks    Task[]    @relation("TaskAssignee")
+  createdTasks     Task[]    @relation("TaskCreator")
+  logs             MissionLog[]
+  vitals           Vital[]
+}
+
+model Mission {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  currentDay  Int
+  phase       String
+  status      String
+  distanceKm  Float
+  delayMinutes Int
+  signalQuality Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages Message[]
+  tasks    Task[]
+  logs     MissionLog[]
+  windows  CommunicationWindow[]
+}
+
+model Message {
+  id          String          @id @default(cuid())
+  missionId   String
+  senderId    String
+  receiverId  String?
+  content     String
+  priority    MessagePriority @default(NORMAL)
+  status      MessageStatus   @default(CREATED)
+  delayMinutes Int            @default(18)
+  createdAt   DateTime        @default(now())
+  queuedAt    DateTime?
+  sentAt       DateTime?
+  deliveredAt DateTime?
+  acknowledgedAt DateTime?
+
+  mission  Mission @relation(fields: [missionId], references: [id])
+  sender   User    @relation("MessageSender", fields: [senderId], references: [id])
+  receiver User?   @relation("MessageReceiver", fields: [receiverId], references: [id])
+
+  statusHistory MessageStatusHistory[]
+}
+
+model MessageStatusHistory {
+  id        String        @id @default(cuid())
+  messageId String
+  status    MessageStatus
+  note      String?
+  createdAt DateTime      @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  missionId   String
+  title       String
+  description String?
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(NORMAL)
+  assigneeId  String?
+  createdById String
+  dueDay      Int?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  mission   Mission @relation(fields: [missionId], references: [id])
+  assignee  User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdBy User    @relation("TaskCreator", fields: [createdById], references: [id])
+}
+
+model MissionLog {
+  id        String   @id @default(cuid())
+  missionId String
+  authorId  String
+  title     String
+  content   String
+  mood      LogMood
+  createdAt DateTime @default(now())
+
+  mission Mission @relation(fields: [missionId], references: [id])
+  author  User    @relation(fields: [authorId], references: [id])
+}
+
+model Vital {
+  id        String   @id @default(cuid())
+  userId    String
+  heartRate Int
+  oxygen    Int
+  temperature Float
+  stressLevel Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CommunicationWindow {
+  id            String   @id @default(cuid())
+  missionId      String
+  isOpen         Boolean
+  signalQuality  Int
+  delayMinutes   Int
+  opensAt        DateTime
+  closesAt       DateTime
+  createdAt      DateTime @default(now())
+
+  mission Mission @relation(fields: [missionId], references: [id])
+}
