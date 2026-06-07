@@ -7,6 +7,14 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+const publicUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  avatar: true,
+};
+
 router.get("/", async (req, res) => {
   try {
     const { missionId } = req.user;
@@ -17,19 +25,10 @@ router.get("/", async (req, res) => {
       },
       include: {
         assignee: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-            avatar: true,
-          },
+          select: publicUserSelect,
         },
         createdBy: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-          },
+          select: publicUserSelect,
         },
       },
       orderBy: [
@@ -55,7 +54,14 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { missionId, id: createdById } = req.user;
-    const { title, description, assigneeId, priority, dueDay } = req.body;
+    const {
+      title,
+      description,
+      assigneeId,
+      priority,
+      dueDay,
+      imageUrl,
+    } = req.body;
 
     if (!title) {
       return res.status(400).json({
@@ -72,10 +78,15 @@ router.post("/", async (req, res) => {
         createdById,
         priority: priority || "NORMAL",
         dueDay: dueDay || null,
+        imageUrl: imageUrl || null,
       },
       include: {
-        assignee: true,
-        createdBy: true,
+        assignee: {
+          select: publicUserSelect,
+        },
+        createdBy: {
+          select: publicUserSelect,
+        },
       },
     });
 
@@ -92,7 +103,33 @@ router.post("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, assigneeId, priority, status, dueDay } = req.body;
+    const {
+      title,
+      description,
+      assigneeId,
+      priority,
+      status,
+      dueDay,
+      imageUrl,
+    } = req.body;
+
+    const existingTask = await prisma.task.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingTask) {
+      return res.status(404).json({
+        message: "Tarefa não encontrada.",
+      });
+    }
+
+    if (existingTask.missionId !== req.user.missionId) {
+      return res.status(403).json({
+        message: "Você não tem permissão para alterar esta tarefa.",
+      });
+    }
 
     const task = await prisma.task.update({
       where: {
@@ -105,10 +142,15 @@ router.patch("/:id", async (req, res) => {
         ...(priority !== undefined && { priority }),
         ...(status !== undefined && { status }),
         ...(dueDay !== undefined && { dueDay }),
+        ...(imageUrl !== undefined && { imageUrl }),
       },
       include: {
-        assignee: true,
-        createdBy: true,
+        assignee: {
+          select: publicUserSelect,
+        },
+        createdBy: {
+          select: publicUserSelect,
+        },
       },
     });
 
