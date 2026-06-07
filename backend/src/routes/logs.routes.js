@@ -5,6 +5,14 @@ const { authMiddleware } = require("../middleware/auth");
 
 const router = express.Router();
 
+const publicUserSelect = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  avatar: true,
+};
+
 router.use(authMiddleware);
 
 router.get("/", async (req, res) => {
@@ -17,12 +25,7 @@ router.get("/", async (req, res) => {
       },
       include: {
         author: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-            avatar: true,
-          },
+          select: publicUserSelect,
         },
       },
       orderBy: {
@@ -43,11 +46,11 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { missionId, id: authorId } = req.user;
-    const { title, content, mood } = req.body;
+    const { title, content, mood, imageUrl } = req.body;
 
     if (!title || !content || !mood) {
       return res.status(400).json({
-        message: "Título, conteúdo e humor são obrigatórios.",
+        message: "Título, conteúdo e estado emocional são obrigatórios.",
       });
     }
 
@@ -58,9 +61,12 @@ router.post("/", async (req, res) => {
         title,
         content,
         mood,
+        imageUrl: imageUrl || null,
       },
       include: {
-        author: true,
+        author: {
+          select: publicUserSelect,
+        },
       },
     });
 

@@ -143,6 +143,7 @@ model MissionLog {
   title     String
   content   String
   mood      LogMood
+  imageUrl  String?
   createdAt DateTime @default(now())
 
   mission Mission @relation(fields: [missionId], references: [id])
