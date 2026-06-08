@@ -1,6 +1,6 @@
 # MarsLink — Plataforma Web + API REST + App Mobile para Missões em Marte
 
-Projeto desenvolvido para a **Global Solution | Indústria Espacial — FIAP · 2º Semestre de 2026**.
+Projeto desenvolvido para a **Global Solution | Indústria Espacial — FIAP · 1º Semestre de 2026**.
 
 O **MarsLink** é uma solução digital full stack criada para simular uma plataforma de comunicação, coordenação e monitoramento em uma missão humana a Marte, considerando um cenário de **latência extrema**, comunicação instável e necessidade de decisões operacionais assíncronas.
 
@@ -1011,37 +1011,6 @@ Esses dados são persistidos no PostgreSQL/Neon e consumidos pela API.
 
 ---
 
-## Status da Entrega
-
-| Item | Status |
-|---|---|
-| Backend/API REST | Concluído |
-| Banco PostgreSQL Neon | Concluído |
-| Prisma ORM e migrations | Concluído |
-| Seed de dados demonstrativos | Concluído |
-| Autenticação JWT | Concluída |
-| Perfis CREW e CONTROL | Concluídos |
-| Dashboard Web Controle Terra | Concluído |
-| App Mobile Tripulação | Concluído |
-| Mensagens assíncronas | Concluídas |
-| Status de mensagens | Concluídos |
-| Tarefas operacionais | Concluídas |
-| Status de tarefas pelo mobile | Concluído |
-| Evidência visual em tarefas | Concluída |
-| Logs da missão | Concluídos |
-| Registros visuais da missão | Concluídos |
-| Upload com Vercel Blob | Concluído |
-| Tripulação e sinais vitais simulados | Concluídos |
-| Janela de comunicação | Concluída |
-| Deploy Backend Vercel | Concluído |
-| Deploy Web Vercel | Concluído |
-| Build Android EAS | Concluído |
-| README unificado | Concluído |
-| Vídeo Pitch | Concluído |
-| PDF Final | A gerar |
-
----
-
 ## Decisões Técnicas
 
 ### Separação entre Web, Mobile e Backend
@@ -1093,18 +1062,6 @@ Essa decisão evita complexidade desnecessária de galeria e mantém o fluxo cla
 As ações de execução de tarefas foram concentradas no app mobile, pois, no contexto da missão, quem realiza as tarefas são os astronautas.
 
 O dashboard web atua como ambiente de monitoramento e coordenação do Controle Terra.
-
----
-
-## Pitch Técnico da Solução
-
-O MarsLink simula uma missão humana a Marte, onde a comunicação com a Terra sofre atraso e não pode depender de respostas instantâneas.
-
-A tripulação usa o app mobile para enviar mensagens, executar tarefas, atualizar status e registrar evidências visuais. O Controle Terra usa o dashboard web para acompanhar a operação, enviar instruções, visualizar logs, monitorar sinais vitais e validar evidências.
-
-O backend integra os dois ambientes com API REST, autenticação JWT, banco PostgreSQL e armazenamento de imagens em nuvem.
-
-A solução demonstra uma arquitetura resiliente que pode ser aplicada tanto em missões espaciais quanto em cenários terrestres com infraestrutura limitada.
 
 ---
 
